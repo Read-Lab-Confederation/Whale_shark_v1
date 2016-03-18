@@ -12,6 +12,7 @@ adaptor1.tab: adaptor.tab
 
 mito.tab: $(TXT)
 	grep 'cvg' $(TXT) | grep 'mitochondrion' | awk '{print $$1}' > mito.tab
+	cat mito.tab | awk '{print $1",mitochondrion,no,yes"}' > mito.csv
 	
 exclude.tab: $(TXT)
 	grep 'cvg' $(TXT) | grep -v 'mitochondrion' | grep -v '\.\.' | awk '{print $$1}' > exclude.tab
