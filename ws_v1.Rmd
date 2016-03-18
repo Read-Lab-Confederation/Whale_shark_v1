@@ -1,0 +1,52 @@
+---
+title: "Whale shark v1 for genbank"
+author: "Tim Read"
+date: "March 17, 2016"
+output: html_document
+---
+
+
+
+```{r load}
+library(Biostrings)
+dna <- readDNAStringSet("~/whale-shark.contigs.draft.v1-genbank.fasta.gz")
+excl <-read.table("./exclude.tab", header=FALSE,stringsAsFactors = FALSE)
+mito <-read.table("./mito.tab", header=FALSE,stringsAsFactors = FALSE)
+adaptor1 <- read.table("./adaptor1.tab", header=FALSE, sep = " ",stringsAsFactors = FALSE)
+adaptor2 <- read.table("./adaptor2.tab", header=FALSE, sep = " ",stringsAsFactors = FALSE)
+```
+
+```{r clip_adaptors}
+#clip adaptor1 first as this processes the ends
+for (i in 1:nrow(adaptor1)){
+  print(i)
+  t <- trim_adapt(adaptor1[i,1],adaptor1[i,2],adaptor1[i,3],dna)
+  dna[t[1]] <- subseq(dna[t[1]],start=t[2],end=t[3])
+}
+
+#this takes the longest amount of time - but you only have to it once!
+for (i in 1:nrow(adaptor2)){
+  print(i)
+  t <- trim_adapt(adaptor2[i,1],adaptor2[i,2],adaptor2[i,3],dna)
+  dna[t[1]] <- subseq(dna[t[1]],start=t[2],end=t[3])
+}
+```
+
+
+```{r exclude_list}
+small <- which(width(dna) < 250)
+excluded <- sapply(excl$V1, function(x) which(x == names(dna)))
+exclude.union <- union(small,excluded)
+```
+
+
+```{r write}
+writeXStringSet(dna[-exclude.union],"~/whale-shark.cleaned.contigs.draft.v1.fasta")
+```
+
+
+```{r}
+sessionInfo()
+```
+
+
